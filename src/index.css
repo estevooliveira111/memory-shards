@@ -12,6 +12,21 @@
   --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --error-color: #ef4444;
   --success-color: #10b981;
+  --accent-text: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #111827;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --accent-primary: #ffffff;
+    --accent-hover: #d1d5db;
+    --glass-bg: #1f2937;
+    --glass-border: #374151;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --accent-text: #000000;
+  }
 }
 
 * {
@@ -105,7 +120,7 @@ main {
 
 input, textarea, select {
   width: 100%;
-  background: #ffffff;
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
   border-radius: 8px;
@@ -129,7 +144,7 @@ input:focus, textarea:focus, select:focus {
 button.primary {
   width: 100%;
   background: var(--accent-primary);
-  color: white;
+  color: var(--accent-text);
   border: none;
   border-radius: 8px;
   padding: 0.875rem;
@@ -157,7 +172,7 @@ button.primary:disabled {
 }
 
 button.secondary {
-  background: #ffffff;
+  background: transparent;
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
   border-radius: 8px;
@@ -169,13 +184,13 @@ button.secondary {
 }
 
 button.secondary:hover {
-  background: #f9fafb;
+  background: var(--glass-bg);
 }
 
 .error-message {
   color: var(--error-color);
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--glass-bg);
+  border: 1px solid var(--error-color);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
