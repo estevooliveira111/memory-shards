@@ -12,7 +12,7 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     // @ts-ignore
     obfuscator({
-      global: true,
+      global: false,
       options: {
         compact: true,
         controlFlowFlattening: true,
