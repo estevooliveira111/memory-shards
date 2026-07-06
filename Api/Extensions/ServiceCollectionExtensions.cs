@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
             options.UseSqlite(configuration.GetConnectionString("Default")));
 
         // AutoMapper
-        services.AddAutoMapper(typeof(ServiceCollectionExtensions).Assembly);
+        services.AddAutoMapper(cfg => {}, typeof(ServiceCollectionExtensions).Assembly);
 
         // FluentValidation — register all validators in the assembly
         services.AddValidatorsFromAssemblyContaining<MessageRepository>();
