@@ -5,6 +5,14 @@ import { Lock, EyeOff, ShieldAlert, KeyRound } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 export default function ViewMessage() {
+  useEffect(() => {
+    document.title = "Visualizar Segredo | Memory Shards";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Visualize esta mensagem confidencial antes que ela se destrua.');
+    }
+  }, []);
+
   const { slug } = useParams<{ slug: string }>();
   
   const [content, setContent] = useState<string | null>(null);

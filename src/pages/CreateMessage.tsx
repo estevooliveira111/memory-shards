@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Lock, Clock, Send, ShieldAlert, Check, Share2, Bold, Italic, Strikethrough, Code, List, ListOrdered } from 'lucide-react';
 import QRCode from 'react-qr-code';
@@ -22,6 +22,14 @@ const MenuBar = ({ editor }: { editor: any }) => {
 };
 
 export default function CreateMessage() {
+  useEffect(() => {
+    document.title = "Criar Segredo Seguro | Memory Shards";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Crie uma mensagem criptografada, segura e temporária. Ninguém além do destinatário poderá ler.');
+    }
+  }, []);
+
   const [content, setContent] = useState('');
   const [expiration, setExpiration] = useState('12h');
   const [password, setPassword] = useState('');
