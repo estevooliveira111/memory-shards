@@ -5,6 +5,8 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using System.Reflection;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 // ─── Serilog bootstrap logger ────────────────────────────────────────────────
 Log.Logger = new LoggerConfiguration()
@@ -27,6 +29,26 @@ try
         .ReadFrom.Configuration(ctx.Configuration)
         .WriteTo.Console(outputTemplate:
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
+
+    // ── Rate Limiting ────────────────────────────────────────────────────────
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? httpContext.Request.Headers.Host.ToString(),
+                factory: partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 60,
+                    QueueLimit = 0,
+                    Window = TimeSpan.FromMinutes(1)
+                }));
+        options.OnRejected = async (context, token) =>
+        {
+            context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
+        };
+    });
 
     // ── Controllers & CORS ───────────────────────────────────────────────────
     builder.Services.AddControllers();
@@ -76,6 +98,18 @@ try
     // ── Global exception handler (must be first in pipeline) ─────────────────
     app.UseMiddleware<GlobalExceptionMiddleware>();
 
+    // ── Security Headers ──────────────────────────────────────────────────────
+    app.Use(async (context, next) =>
+    {
+        context.Response.Headers.Append("X-Frame-Options", "DENY");
+        context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+        context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+        // We use unsafe-eval for some frontend libraries if necessary, but we'll try strict
+        context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self';");
+        context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+        await next();
+    });
+
     // ── Swagger JSON (keeps OpenAPI spec available for tooling) ────────────────────
     app.UseSwagger(options => options.RouteTemplate = "openapi/{documentName}.json");
 
@@ -94,6 +128,9 @@ try
     // ── CORS & Routing ────────────────────────────────────────────────────────
     app.UseCors("AllowFrontend");
     
+    // ── Rate Limiter ──────────────────────────────────────────────────────────
+    app.UseRateLimiter();
+
     // ── Static Files (React Front-end) ────────────────────────────────────────
     app.UseDefaultFiles();
     app.UseStaticFiles();
