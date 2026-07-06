@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../services/api';
 import { Lock, Clock, Send, ShieldAlert, Check } from 'lucide-react';
+import QRCode from 'react-qr-code';
 
 export default function CreateMessage() {
   const [content, setContent] = useState('');
@@ -67,6 +68,14 @@ export default function CreateMessage() {
               {copied ? <Check size={20} /> : 'Copiar'}
             </button>
           </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0', background: 'white', padding: '1rem', borderRadius: '12px' }}>
+          <QRCode 
+            value={successData.url} 
+            size={180}
+            level="M"
+          />
         </div>
 
         <p className="meta-text">
