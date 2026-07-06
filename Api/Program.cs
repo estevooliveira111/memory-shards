@@ -64,9 +64,8 @@ try
             }
             else
             {
-                policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175").AllowAnyMethod().AllowAnyHeader();
-                // Alternatively, in production, we might allow any origin if public API is intended:
-                // policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                // Em produção (como no Railway) se não houver configuração, permitimos todas as origens para evitar bloqueios do frontend.
+                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             }
         });
     });
