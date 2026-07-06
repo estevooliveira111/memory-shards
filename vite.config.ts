@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
-import obfuscator from 'rollup-plugin-obfuscator'
+// import obfuscator from 'rollup-plugin-obfuscator'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,6 +10,7 @@ export default defineConfig({
     tailwindcss(),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
+    /*
     // @ts-ignore
     obfuscator({
       global: false,
@@ -45,6 +46,7 @@ export default defineConfig({
         unicodeEscapeSequence: false
       }
     })
+    */
   ],
   build: {
     sourcemap: false
