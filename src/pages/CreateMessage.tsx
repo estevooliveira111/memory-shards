@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../services/api';
-import { Lock, Clock, Send, ShieldAlert, Check } from 'lucide-react';
+import { Lock, Clock, Send, ShieldAlert, Check, Share2 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
 export default function CreateMessage() {
@@ -68,6 +68,25 @@ export default function CreateMessage() {
               {copied ? <Check size={20} /> : 'Copiar'}
             </button>
           </div>
+          {typeof navigator !== 'undefined' && navigator.share && (
+            <button 
+              className="secondary" 
+              style={{ width: '100%', marginTop: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+              onClick={async () => {
+                try {
+                  await navigator.share({
+                    title: 'Memory Shards',
+                    text: 'Tenho um segredo para você! Abra este link antes que ele expire:',
+                    url: successData.url
+                  });
+                } catch (err) {
+                  console.error('Erro ao compartilhar:', err);
+                }
+              }}
+            >
+              <Share2 size={18} /> Compartilhar Link
+            </button>
+          )}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0', background: 'white', padding: '1rem', borderRadius: '12px' }}>
