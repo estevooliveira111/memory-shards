@@ -116,12 +116,49 @@ export default function CreateMessage() {
           )}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0', background: 'white', padding: '1rem', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '2rem 0', background: 'white', padding: '1rem', borderRadius: '12px' }}>
           <QRCode 
+            id="qr-code-svg"
             value={successData.url} 
             size={180}
             level="M"
           />
+          <button 
+            className="secondary" 
+            style={{ marginTop: '1rem', fontSize: '0.75rem', padding: '0.4rem 0.8rem', border: '1px solid #e5e7eb' }}
+            onClick={() => {
+              const svg = document.getElementById("qr-code-svg");
+              if (!svg) return;
+              const svgData = new XMLSerializer().serializeToString(svg);
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
+              const img = new Image();
+              img.onload = () => {
+                canvas.width = img.width + 40; // add padding
+                canvas.height = img.height + 40;
+                if (ctx) {
+                  ctx.fillStyle = "white";
+                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+                  ctx.drawImage(img, 20, 20);
+                }
+                canvas.toBlob(async (blob) => {
+                  if (!blob) return;
+                  const file = new File([blob], "qrcode.png", { type: "image/png" });
+                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file], title: 'QR Code' }); } catch (e) {}
+                  } else {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'qrcode.png';
+                    a.click();
+                  }
+                }, "image/png");
+              };
+              img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+            }}
+          >
+            Compartilhar Imagem do QR Code
+          </button>
         </div>
 
         <p className="meta-text">
