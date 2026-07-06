@@ -238,3 +238,117 @@ button.secondary:hover {
     transform: translateY(0);
   }
 }
+
+/* Tiptap Editor Styles */
+.tiptap-container {
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tiptap-container.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.tiptap-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: #f9fafb;
+  flex-wrap: wrap;
+}
+
+.tiptap-toolbar button {
+  background: transparent;
+  border: none;
+  padding: 0.4rem;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.tiptap-toolbar button:hover {
+  background: #e5e7eb;
+  color: var(--text-primary);
+}
+
+.tiptap-toolbar button.is-active {
+  background: #e5e7eb;
+  color: var(--accent-primary);
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--glass-border);
+  margin: 0 0.25rem;
+}
+
+.ProseMirror {
+  padding: 1rem;
+  min-height: 120px;
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Rich Text Content Formatting (Shared for Editor and Viewer) */
+.ProseMirror, .tiptap-content {
+  line-height: 1.6;
+}
+
+.ProseMirror p, .tiptap-content p {
+  margin-bottom: 0.75em;
+}
+
+.ProseMirror p:last-child, .tiptap-content p:last-child {
+  margin-bottom: 0;
+}
+
+.ProseMirror ul, .tiptap-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75em;
+}
+
+.ProseMirror ol, .tiptap-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75em;
+}
+
+.ProseMirror strong, .tiptap-content strong {
+  font-weight: 700;
+}
+
+.ProseMirror em, .tiptap-content em {
+  font-style: italic;
+}
+
+.ProseMirror s, .tiptap-content s {
+  text-decoration: line-through;
+}
+
+.ProseMirror code, .tiptap-content code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}

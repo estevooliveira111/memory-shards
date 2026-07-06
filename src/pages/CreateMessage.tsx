@@ -1,7 +1,25 @@
 import { useState } from 'react';
 import { api } from '../services/api';
-import { Lock, Clock, Send, ShieldAlert, Check, Share2 } from 'lucide-react';
+import { Lock, Clock, Send, ShieldAlert, Check, Share2, Bold, Italic, Strikethrough, Code, List, ListOrdered } from 'lucide-react';
 import QRCode from 'react-qr-code';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+
+const MenuBar = ({ editor }: { editor: any }) => {
+  if (!editor) return null;
+
+  return (
+    <div className="tiptap-toolbar">
+      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'is-active' : ''}><Bold size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'is-active' : ''}><Italic size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? 'is-active' : ''}><Strikethrough size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} className={editor.isActive('code') ? 'is-active' : ''}><Code size={16} /></button>
+      <div className="toolbar-divider" />
+      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'is-active' : ''}><List size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'is-active' : ''}><ListOrdered size={16} /></button>
+    </div>
+  );
+};
 
 export default function CreateMessage() {
   const [content, setContent] = useState('');
@@ -12,12 +30,23 @@ export default function CreateMessage() {
   const [successData, setSuccessData] = useState<{ url: string; expiresAt: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '',
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML());
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) {
+    
+    // Tiptap returns <p></p> when empty, so we need to check if there is actual text
+    if (!editor || editor.isEmpty) {
       setError('O conteúdo da mensagem é obrigatório.');
       return;
     }
+    
     if (password && !/^\d{1,6}$/.test(password)) {
       setError('A senha deve conter apenas números (máx 6 dígitos).');
       return;
@@ -32,8 +61,6 @@ export default function CreateMessage() {
         expiration,
         password: password || undefined,
       });
-      // The backend returns url like "https://localhost:7001/m/slug"
-      // Since we want the frontend URL, we reconstruct it using window.location.origin
       const frontendUrl = `${window.location.origin}/m/${response.slug}`;
       setSuccessData({ url: frontendUrl, expiresAt: response.expiresAt });
     } catch (err: any) {
@@ -106,6 +133,7 @@ export default function CreateMessage() {
           style={{ width: '100%', marginTop: '1.5rem' }}
           onClick={() => {
             setSuccessData(null);
+            editor?.commands.setContent('');
             setContent('');
             setPassword('');
           }}
@@ -130,13 +158,10 @@ export default function CreateMessage() {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>O que você deseja compartilhar?</label>
-          <textarea 
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Digite seu texto, código ou segredo aqui..."
-            disabled={loading}
-            maxLength={50000}
-          />
+          <div className={`tiptap-container ${loading ? 'disabled' : ''}`}>
+            <MenuBar editor={editor} />
+            <EditorContent editor={editor} />
+          </div>
         </div>
 
         <div className="form-group">
@@ -168,7 +193,7 @@ export default function CreateMessage() {
           </p>
         </div>
 
-        <button type="submit" className="primary" disabled={loading || !content.trim()}>
+        <button type="submit" className="primary" disabled={loading || !editor || editor.isEmpty}>
           {loading ? 'Criptografando e salvando...' : (
             <>Gerar Link Seguro <Send size={18} /></>
           )}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Lock, EyeOff, ShieldAlert, KeyRound } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 export default function ViewMessage() {
   const { slug } = useParams<{ slug: string }>();
@@ -113,9 +114,10 @@ export default function ViewMessage() {
     <div className="glass-card">
       <h2 className="title">Mensagem Recebida</h2>
       
-      <div className="message-content">
-        {content}
-      </div>
+      <div 
+        className="message-content tiptap-content" 
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }} 
+      />
 
       <p className="meta-text" style={{ marginTop: '2rem' }}>
         Esta mensagem expira automaticamente e não poderá ser recuperada.
