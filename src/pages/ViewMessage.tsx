@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { Lock, EyeOff, ShieldAlert, KeyRound, Eye } from 'lucide-react';
+import { Lock, EyeOff, ShieldAlert, KeyRound } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 export default function ViewMessage() {
@@ -14,7 +14,6 @@ export default function ViewMessage() {
   const [requiresPassword, setRequiresPassword] = useState(false);
 
   // Anti-screenshot state
-  const [isRevealed, setIsRevealed] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 10).toUpperCase());
   const [timestamp] = useState(() => new Date().toISOString());
@@ -28,7 +27,7 @@ export default function ViewMessage() {
   // Anti-screenshot focus listener
   useEffect(() => {
     const handleVisibilityChange = () => setIsFocused(!document.hidden);
-    const handleBlur = () => { setIsRevealed(false); setIsFocused(false); };
+    const handleBlur = () => setIsFocused(false);
     const handleFocus = () => setIsFocused(true);
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -151,12 +150,12 @@ export default function ViewMessage() {
 
       <div className="secure-message-container" style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', minHeight: '150px', background: '#f9fafb', border: '1px solid var(--glass-border)' }}>
         <div 
-          className={`tiptap-content secure-blur-content ${(!isRevealed || !isFocused) ? 'is-blurred' : ''}`} 
+          className={`tiptap-content secure-blur-content ${!isFocused ? 'is-blurred' : ''}`} 
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }} 
-          style={{ padding: '1.5rem', pointerEvents: isRevealed ? 'auto' : 'none' }}
+          style={{ padding: '1.5rem', pointerEvents: isFocused ? 'auto' : 'none' }}
         />
         
-        {isRevealed && isFocused && (
+        {isFocused && (
           <div className="watermark-overlay">
             {Array.from({ length: 40 }).map((_, i) => (
               <div key={i} className="watermark-item">
@@ -166,24 +165,13 @@ export default function ViewMessage() {
           </div>
         )}
 
-        {(!isRevealed || !isFocused) && (
+        {!isFocused && (
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
             <EyeOff size={32} color="var(--text-secondary)" style={{ margin: '0 auto 0.5rem' }} />
             <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Conteúdo Oculto</span>
           </div>
         )}
       </div>
-
-      <button 
-        className="primary" 
-        style={{ width: '100%', marginTop: '1.5rem', touchAction: 'none' }}
-        onPointerDown={(e) => { e.preventDefault(); setIsRevealed(true); }}
-        onPointerUp={(e) => { e.preventDefault(); setIsRevealed(false); }}
-        onPointerLeave={(e) => { e.preventDefault(); setIsRevealed(false); }}
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        <Eye size={18} /> Segure para revelar
-      </button>
 
       <p className="meta-text" style={{ marginTop: '2rem' }}>
         Esta mensagem expira automaticamente e não poderá ser recuperada.
