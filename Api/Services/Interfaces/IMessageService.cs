@@ -10,7 +10,9 @@ public interface IMessageService
     /// <summary>
     /// Retrieves and decrypts (if needed) a message by slug.
     /// </summary>
+    /// <param name="slug">The message identifier.</param>
     /// <param name="password">Optional password. Required for encrypted messages.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <exception cref="Api.Exceptions.MessageNotFoundException"/>
     /// <exception cref="Api.Exceptions.MessageExpiredException"/>
     /// <exception cref="Api.Exceptions.InvalidPasswordException"/>
