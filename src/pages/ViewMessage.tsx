@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { Lock, EyeOff, ShieldAlert, KeyRound } from 'lucide-react';
+import { Lock, EyeOff, ShieldAlert, KeyRound, Eye } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 export default function ViewMessage() {
@@ -13,11 +13,39 @@ export default function ViewMessage() {
   const [error, setError] = useState<{ type: string, message: string } | null>(null);
   const [requiresPassword, setRequiresPassword] = useState(false);
 
+  // Anti-screenshot state
+  const [isRevealed, setIsRevealed] = useState(false);
+  const [isFocused, setIsFocused] = useState(true);
+  const [sessionId] = useState(() => Math.random().toString(36).substring(2, 10).toUpperCase());
+  const [timestamp] = useState(() => new Date().toISOString());
+
   useEffect(() => {
     if (slug) {
       fetchMessage();
     }
   }, [slug]);
+
+  // Anti-screenshot focus listener
+  useEffect(() => {
+    const handleVisibilityChange = () => setIsFocused(!document.hidden);
+    const handleBlur = () => { setIsRevealed(false); setIsFocused(false); };
+    const handleFocus = () => setIsFocused(true);
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    
+    // Prevent context menu (right click) globally on this view
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []);
 
   const fetchMessage = async (pwd?: string) => {
     setLoading(true);
@@ -111,13 +139,51 @@ export default function ViewMessage() {
   }
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
       <h2 className="title">Mensagem Recebida</h2>
       
-      <div 
-        className="message-content tiptap-content" 
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }} 
-      />
+      {!isFocused && (
+        <div className="error-message" style={{ justifyContent: 'center' }}>
+          <ShieldAlert size={20} />
+          <span>Foco perdido. Clique na janela para visualizar.</span>
+        </div>
+      )}
+
+      <div className="secure-message-container" style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', minHeight: '150px', background: '#f9fafb', border: '1px solid var(--glass-border)' }}>
+        <div 
+          className={`tiptap-content secure-blur-content ${(!isRevealed || !isFocused) ? 'is-blurred' : ''}`} 
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }} 
+          style={{ padding: '1.5rem', pointerEvents: isRevealed ? 'auto' : 'none' }}
+        />
+        
+        {isRevealed && isFocused && (
+          <div className="watermark-overlay">
+            {Array.from({ length: 40 }).map((_, i) => (
+              <div key={i} className="watermark-item">
+                ID: {sessionId}<br/>{timestamp}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {(!isRevealed || !isFocused) && (
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
+            <EyeOff size={32} color="var(--text-secondary)" style={{ margin: '0 auto 0.5rem' }} />
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Conteúdo Oculto</span>
+          </div>
+        )}
+      </div>
+
+      <button 
+        className="primary" 
+        style={{ width: '100%', marginTop: '1.5rem', touchAction: 'none' }}
+        onPointerDown={(e) => { e.preventDefault(); setIsRevealed(true); }}
+        onPointerUp={(e) => { e.preventDefault(); setIsRevealed(false); }}
+        onPointerLeave={(e) => { e.preventDefault(); setIsRevealed(false); }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        <Eye size={18} /> Segure para revelar
+      </button>
 
       <p className="meta-text" style={{ marginTop: '2rem' }}>
         Esta mensagem expira automaticamente e não poderá ser recuperada.
