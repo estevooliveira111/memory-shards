@@ -4,6 +4,13 @@ import { api } from '../services/api';
 import { Lock, EyeOff, ShieldAlert, KeyRound } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { OTPInput } from '../components/OTPInput';
+import { Timer } from 'lucide-react';
+
+interface LockoutState {
+  attempts: number;
+  lockCount: number;
+  lockedUntil: number;
+}
 
 export default function ViewMessage() {
   useEffect(() => {
@@ -21,6 +28,31 @@ export default function ViewMessage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ type: string, message: string } | null>(null);
   const [requiresPassword, setRequiresPassword] = useState(false);
+
+  // Progressive Backoff State
+  const [lockout, setLockout] = useState<LockoutState>(() => {
+    const saved = localStorage.getItem(`lockout_${slug}`);
+    if (saved) return JSON.parse(saved);
+    return { attempts: 0, lockCount: 0, lockedUntil: 0 };
+  });
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      if (lockout.lockedUntil > now) {
+        setTimeLeft(Math.ceil((lockout.lockedUntil - now) / 1000));
+      } else {
+        setTimeLeft(0);
+      }
+    }, 1000);
+    // Execute immediately to prevent 1s delay
+    const now = Date.now();
+    if (lockout.lockedUntil > now) {
+      setTimeLeft(Math.ceil((lockout.lockedUntil - now) / 1000));
+    }
+    return () => clearInterval(timer);
+  }, [lockout.lockedUntil]);
 
   // Anti-screenshot state
   const [isFocused, setIsFocused] = useState(true);
@@ -62,10 +94,30 @@ export default function ViewMessage() {
       const response = await api.getMessage(slug!, pwd);
       setContent(response.content);
       setRequiresPassword(false);
+      localStorage.removeItem(`lockout_${slug}`);
     } catch (err: any) {
       if (err.status === 401) {
         setRequiresPassword(true);
         if (pwd) {
+          const newAttempts = lockout.attempts + 1;
+          let shouldBlock = false;
+          if (lockout.lockCount === 0 && newAttempts >= 3) shouldBlock = true;
+          if (lockout.lockCount > 0 && newAttempts >= 1) shouldBlock = true;
+
+          let newLockout = { ...lockout, attempts: newAttempts };
+
+          if (shouldBlock) {
+            const nextLockCount = lockout.lockCount + 1;
+            const penaltySeconds = 60 * Math.pow(2, nextLockCount - 1);
+            newLockout = {
+              attempts: 0,
+              lockCount: nextLockCount,
+              lockedUntil: Date.now() + penaltySeconds * 1000
+            };
+          }
+          
+          setLockout(newLockout);
+          localStorage.setItem(`lockout_${slug}`, JSON.stringify(newLockout));
           setError({ type: 'auth', message: 'Senha incorreta. Tente novamente.' });
         }
       } else if (err.status === 404) {
@@ -118,23 +170,34 @@ export default function ViewMessage() {
           Esta mensagem está criptografada. Digite a senha para visualizar o conteúdo.
         </p>
 
-        {error?.type === 'auth' && (
+        {error?.type === 'auth' && !timeLeft && (
           <div className="error-message">
             <ShieldAlert size={20} />
             <span>{error.message}</span>
           </div>
         )}
 
+        {timeLeft > 0 && (
+          <div className="lockout-alert">
+            <Timer size={24} color="var(--error-color)" />
+            <div>
+              <strong style={{ color: 'var(--error-color)' }}>Muitas tentativas!</strong>
+              <p>Você foi bloqueado. Tente novamente em: <strong>{String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}</strong></p>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handlePasswordSubmit}>
-          <div className="form-group">
+          <div className={`form-group ${timeLeft > 0 ? 'disabled' : ''}`}>
             <label style={{ textAlign: 'center' }}>Senha Numérica</label>
             <OTPInput 
               length={6}
               value={password}
               onChange={(val) => setPassword(val)}
+              disabled={timeLeft > 0}
             />
           </div>
-          <button type="submit" className="primary" disabled={!password}>
+          <button type="submit" className="primary" disabled={!password || timeLeft > 0}>
             Descriptografar <Lock size={18} />
           </button>
         </form>

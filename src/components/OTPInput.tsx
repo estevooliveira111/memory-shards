@@ -5,9 +5,10 @@ interface OTPInputProps {
   length?: number;
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export function OTPInput({ length = 6, value, onChange }: OTPInputProps) {
+export function OTPInput({ length = 6, value, onChange, disabled = false }: OTPInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -75,6 +76,7 @@ export function OTPInput({ length = 6, value, onChange }: OTPInputProps) {
           onChange={(e) => handleChange(e, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           onPaste={handlePaste}
+          disabled={disabled}
           className="otp-input"
         />
       ))}

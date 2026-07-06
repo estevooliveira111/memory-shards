@@ -16,7 +16,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --bg-color: #111827;
     --text-primary: #f9fafb;
     --text-secondary: #9ca3af;
@@ -27,6 +27,18 @@
     --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     --accent-text: #000000;
   }
+}
+
+:root.dark {
+  --bg-color: #111827;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --accent-primary: #ffffff;
+  --accent-hover: #d1d5db;
+  --glass-bg: #1f2937;
+  --glass-border: #374151;
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --accent-text: #000000;
 }
 
 * {
@@ -440,4 +452,27 @@ button.secondary:hover {
     height: 3.5rem;
     font-size: 1.25rem;
   }
+}
+
+.lockout-alert {
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  border: 1px solid var(--error-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: slideUp 0.3s ease;
+}
+
+.lockout-alert p {
+  margin-top: 0.25rem;
+}
+
+.form-group.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
