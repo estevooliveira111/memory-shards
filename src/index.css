@@ -78,7 +78,7 @@ main {
   border-radius: 12px;
   padding: 2.5rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   box-shadow: var(--glass-shadow);
   animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
