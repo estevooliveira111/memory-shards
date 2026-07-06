@@ -11,7 +11,7 @@ RUN npm run build
 # ==========================================
 # Estágio 2: Build do Back-end (.NET 10)
 # ==========================================
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS backend-build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /src
 COPY ["Api/Api.csproj", "Api/"]
 RUN dotnet restore "Api/Api.csproj"
@@ -26,7 +26,7 @@ RUN dotnet publish "Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 # ==========================================
 # Estágio 3: Runtime Unificado (Final)
 # ==========================================
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # 1. Copia o backend compilado
