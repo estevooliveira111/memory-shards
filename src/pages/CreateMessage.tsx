@@ -4,6 +4,7 @@ import { Lock, Clock, Send, ShieldAlert, Check, Share2, Bold, Italic, Strikethro
 import QRCode from 'react-qr-code';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { OTPInput } from '../components/OTPInput';
 
 const MenuBar = ({ editor }: { editor: any }) => {
   if (!editor) return null;
@@ -224,14 +225,10 @@ export default function CreateMessage() {
 
         <div className="form-group">
           <label>Senha de Proteção (Opcional) <Lock size={14} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }}/></label>
-          <input 
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Até 6 dígitos (ex: 123456)"
-            disabled={loading}
-            pattern="\d*"
-            maxLength={6}
+          <OTPInput 
+            length={6} 
+            value={password} 
+            onChange={(val) => setPassword(val)} 
           />
           <p className="meta-text" style={{ textAlign: 'left', marginTop: '0.25rem', fontSize: '0.75rem' }}>
             Se definido, a mensagem será criptografada com AES-256 e só poderá ser lida com a senha.

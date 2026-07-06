@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Lock, EyeOff, ShieldAlert, KeyRound } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import { OTPInput } from '../components/OTPInput';
 
 export default function ViewMessage() {
   useEffect(() => {
@@ -126,15 +127,11 @@ export default function ViewMessage() {
 
         <form onSubmit={handlePasswordSubmit}>
           <div className="form-group">
-            <label>Senha Numérica</label>
-            <input 
-              type="password"
+            <label style={{ textAlign: 'center' }}>Senha Numérica</label>
+            <OTPInput 
+              length={6}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Digite a senha..."
-              autoFocus
-              pattern="\d*"
-              maxLength={6}
+              onChange={(val) => setPassword(val)}
             />
           </div>
           <button type="submit" className="primary" disabled={!password}>

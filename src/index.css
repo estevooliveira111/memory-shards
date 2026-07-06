@@ -390,3 +390,39 @@ button.secondary:hover {
   color: #000;
   font-family: monospace;
 }
+
+/* OTP Input Styles */
+.otp-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.otp-input {
+  width: 3rem;
+  height: 4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background-color: var(--glass-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 400px) {
+  .otp-input {
+    width: 2.5rem;
+    height: 3.5rem;
+    font-size: 1.25rem;
+  }
+}
