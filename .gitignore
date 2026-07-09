@@ -26,3 +26,4 @@ dist-ssr
 # .NET build output (test projects, etc.)
 [Bb]in/
 [Oo]bj/
+[Tt]est[Rr]esults/
