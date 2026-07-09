@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# .NET build output (test projects, etc.)
+[Bb]in/
+[Oo]bj/
